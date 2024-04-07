@@ -18,7 +18,7 @@ const { routeTo } = usePageStore()
 		</div>
 
 		<div class="privacy">
-			<a href="/" target="_blank">Privacy Policy</a>
+			<a href="https://docs.google.com/document/d/1Hk88865_6yvWeWvi25jErXQOD6Oi5-h2qEHW5d8P25Y" target="_blank">Privacy Policy</a>
 		</div>
 	</div>
 </template>
