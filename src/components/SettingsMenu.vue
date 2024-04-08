@@ -49,7 +49,7 @@
 									}"
 									@click="selectTheme(setting.id)"
 								>
-									<img :src="`/img/board/${setting.board}.png`" />
+									<img :src="`./img/board/${setting.board}.png`" />
 								</button>
 							</div>
 						</div>
