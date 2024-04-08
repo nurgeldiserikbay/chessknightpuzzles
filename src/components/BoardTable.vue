@@ -66,7 +66,7 @@ const borderWidth = ref(16)
 
 const getTableStyle = computed(() => {
 	return {
-		background: `url('/img/board/${gameStore.getGameSettings.boardBorderImg}.png')`,
+		background: `url('./img/board/${gameStore.getGameSettings.boardBorderImg}.png')`,
 	}
 })
 
@@ -81,7 +81,7 @@ const getCellStyle = computed(() => (ind: number) => {
 			minWidth: `${boardWidth.value}px`,
 			height: `${boardWidth.value}px`,
 			minHeight: `${boardWidth.value}px`,
-			backgroundImage: `url('/img/board/${gameStore.getGameSettings.board1}.png')`,
+			backgroundImage: `url('./img/board/${gameStore.getGameSettings.board1}.png')`,
 		}
 	} else {
 		return {
@@ -89,13 +89,13 @@ const getCellStyle = computed(() => (ind: number) => {
 			minWidth: `${boardWidth.value}px`,
 			height: `${boardWidth.value}px`,
 			minHeight: `${boardWidth.value}px`,
-			backgroundImage: `url('/img/board/${gameStore.getGameSettings.board2}.png')`,
+			backgroundImage: `url('./img/board/${gameStore.getGameSettings.board2}.png')`,
 		}
 	}
 })
 
 const getHorseImage = computed(() => {
-	return `/img/board/${gameStore.getGameSettings.horse}.png`
+	return `./img/board/${gameStore.getGameSettings.horse}.png`
 })
 
 onMounted(() => {

@@ -36,7 +36,7 @@ function clickLevel(levelInd: number) {
 					<span class="level__row level__row--level">{{
 						level.level + 1
 					}}</span>
-					<img :src="`/img/levels/${level.img}.png`" alt="" />
+					<img :src="`./img/levels/${level.img}.png`" alt="" />
 				</div>
 				<div class="level__info">
 					<span class="level__row level__row--level">{{
