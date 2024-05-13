@@ -27,8 +27,8 @@ export class Game {
 		this.order = 0
 	}
 
-	move(r: number, c: number): boolean {
-		return this.horses[this.order].moveHorse([r, c])
+	move(r: number, c: number, canToBack: boolean): boolean {
+		return this.horses[this.order].moveHorse([r, c], canToBack)
 	}
 
 	setOrder(order: number) {

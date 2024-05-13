@@ -30,14 +30,15 @@ $height: 22px;
 	min-width: 2 * $height;
 	border-radius: ($height + 2) * 0.5;
 	position: relative;
-  background: #aa1e05;
-  transition: 0.3s linear;
+	background: #cfcfcfbc;
+	transition: 0.3s linear;
 	cursor: pointer;
-	box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.6);
+	box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.8);
 
-  &--active {
-    background: #fecb23;
-  }
+	&--active {
+		background: #e5ff00;
+		box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.8);
+	}
 
 	&__circle {
 		position: absolute;
@@ -46,7 +47,12 @@ $height: 22px;
 		width: $height * 1.2;
 		height: $height * 1.2;
 		border-radius: 50%;
-  	background: radial-gradient(ellipse at center, #538d70 0%, #144d2e 85%);
+		background: radial-gradient(
+			ellipse at center,
+			rgb(161, 247, 171) 0%,
+			#43fa01 60%,
+			#040e00 90%
+		);
 		box-sizing: border-box;
 		transition: 0.1s linear;
 		transform: translateX(0);

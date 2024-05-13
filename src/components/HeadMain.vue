@@ -4,6 +4,7 @@
 		<ScoreTable
 			v-if="pageStore.currentPage === PAGES.PLAYGROUND"
 			:isGameEnd="isGameEnd"
+			@timeend="timeend"
 		/>
 		<SettingsMenu v-if="settings" />
 	</div>
@@ -24,6 +25,12 @@ defineProps<{
 	isGameEnd?: boolean
 	settings: boolean
 }>()
+
+const $emits = defineEmits(['timeend'])
+
+function timeend() {
+	$emits('timeend')
+}
 </script>
 
 <style lang="scss" scoped>

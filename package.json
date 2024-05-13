@@ -6,9 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:android": "yarn build && npx capacitor-assets generate && npx cap sync && npx cap open android"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^5.3.1",
+    "@capacitor/android": "^5.7.4",
+    "@capacitor/core": "^5.7.4",
+    "@capacitor/ios": "^5.7.4",
+    "@capacitor/preferences": "^5.0.7",
     "html2canvas": "^1.4.1",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
@@ -17,8 +23,11 @@
     "vue": "^3.4.19"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^5.7.4",
     "@vite-pwa/assets-generator": "^0.2.4",
     "@vitejs/plugin-vue": "^5.0.4",
+    "capacitor-set-version": "^2.2.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
     "vite-plugin-pwa": "^0.19.4",

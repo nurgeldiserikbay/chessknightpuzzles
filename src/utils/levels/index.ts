@@ -78,7 +78,7 @@ import level76 from './level-76'
 import level77 from './level-77'
 import level78 from './level-78'
 import level79 from './level-79'
-// import level80 from './level-80'
+import level80 from './level-80'
 
 export default [
 	level0,
@@ -161,5 +161,5 @@ export default [
 	level77,
 	level78,
 	level79,
-	// level80,
+	level80,
 ]

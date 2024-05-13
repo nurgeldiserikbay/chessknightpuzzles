@@ -1,11 +1,12 @@
 <template>
 	<div class="score-table">
-		<div class="score-table__time">
+		<div v-if="!isSecondType" class="score-table__time">
 			<span>Time:</span>
-			<span>{{ timeValue }}</span>
+			<span class="score-table__time-value">{{ timeValue }}</span>
 		</div>
 		<div class="score-table__move">
-			<span>Moves:</span>
+			<span v-if="isFirstType">Moves:</span>
+			<span v-else>Pills:</span>
 			<span v-if="gameStore.curGameStat">{{
 				gameStore.curGameStat.moves
 			}}</span>
@@ -16,27 +17,63 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 
+import { GAME_TYPES } from '@/utils/conts'
+
 import { useGameStore } from '@/store/gameStore'
+import { useAdsStore } from '@/store/adsStore'
+
+import Admob from '@/utils/admob'
 
 const $props = defineProps<{
 	isGameEnd?: boolean
 }>()
 
+const $emits = defineEmits(['timeend'])
+
 const gameStore = useGameStore()
+const adsStore = useAdsStore()
+
+const MS_HOUR = 60 * 60 * 10
+const MS_MIN = 60 * 10
+const MS_SEC = 10
+
+let timerId: ReturnType<typeof setInterval> | undefined
 
 const date = ref(0)
-const timerId = ref<ReturnType<typeof setInterval>>()
-const timeValue = computed(() => {
-	const h = Math.floor(date.value / 3600)
-	const m = Math.floor((date.value % 3600) / 60)
-	const s = (date.value % 3600) % 60
 
-	return `${h ? `${h} : ` : ''}${addZero(m)} : ${addZero(s)}`
+const timeValue = ref('')
+
+const isFirstType = computed(() => {
+	return gameStore.gameType === GAME_TYPES.COLLECT_ALL
+})
+
+const isSecondType = computed(() => {
+	return gameStore.gameType === GAME_TYPES.NO_WAY_BACK
+})
+
+const isThirdType = computed(() => {
+	return gameStore.gameType === GAME_TYPES.BY_TIME
 })
 
 watch(
 	() => gameStore.curGameStat,
-	() => createTimer(),
+	() => {
+		if (!isSecondType.value) {
+			setTimerStart()
+			if (import.meta.env.VITE_APP_MODE !== 'TEST') {
+				adsStore.toggleLoading(true)
+				Admob.interstitial({
+					isFirst: false,
+					onInterstitialAdClosed: () => {
+						adsStore.toggleLoading(false)
+						createTimer()
+					},
+				})
+			} else {
+				createTimer()
+			}
+		}
+	},
 	{ immediate: true }
 )
 
@@ -44,21 +81,61 @@ watch(
 	() => $props.isGameEnd,
 	() => {
 		if ($props.isGameEnd) {
-			if (timerId.value) clearInterval(timerId.value)
+			clearTimer()
 			gameStore.gameEnd(timeValue.value)
 		}
 	}
 )
 
+watch(
+	() => date.value,
+	() => {
+		if (isThirdType.value && date.value === 0) {
+			clearTimer()
+			$emits('timeend')
+		}
+	}
+)
+
 onBeforeUnmount(() => {
-	if (timerId.value) clearInterval(timerId.value)
+	clearTimer()
 })
 
+function setTimerStart() {
+	if (isThirdType.value) date.value = 300
+	else date.value = 0
+	setTimerValue()
+}
+
 function createTimer() {
-	date.value = 0
-	timerId.value = setInterval(() => {
-		date.value += 1
-	}, 1000)
+	clearTimer()
+	timerId = setInterval(() => {
+		date.value += isThirdType.value ? -1 : 1
+		setTimerValue()
+
+		if ($props.isGameEnd) {
+			clearTimer()
+			gameStore.gameEnd(timeValue.value)
+		}
+	}, 100)
+}
+
+function setTimerValue() {
+	let reminder = date.value
+	const h = Math.floor(date.value / MS_HOUR)
+	reminder = reminder % MS_HOUR
+	const m = Math.floor(reminder / MS_MIN)
+	reminder = reminder % MS_MIN
+	const s = Math.floor(reminder / MS_SEC)
+	const ms = reminder % MS_SEC
+
+	timeValue.value = `${h ? `${addZero(h)} : ` : ''}${
+		m ? `${addZero(m)} : ` : ''
+	}${addZero(s)} : ${addZero(ms)}`
+}
+
+function clearTimer() {
+	if (timerId) clearInterval(timerId)
 }
 
 function addZero(num: number) {
@@ -76,9 +153,10 @@ function addZero(num: number) {
 	align-items: center;
 	gap: 25px;
 
-	@media screen and (max-width: $media-tablet) {
+	@media screen and (max-width: $media-mdphone) {
 		justify-content: center;
-		gap: 0px;
+		flex-direction: column;
+		gap: 0px 15px;
 		flex-wrap: wrap;
 	}
 
@@ -87,6 +165,7 @@ function addZero(num: number) {
 		display: flex;
 		align-items: center;
 		gap: 15px;
+		color: #fff;
 
 		span {
 			&:last-child {
@@ -105,6 +184,10 @@ function addZero(num: number) {
 				color: #fecb23;
 			}
 		}
+	}
+
+	&__time-value {
+		width: 140px;
 	}
 }
 </style>

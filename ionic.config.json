@@ -1,0 +1,7 @@
+{
+  "name": "Chess Knight Puzzles",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}

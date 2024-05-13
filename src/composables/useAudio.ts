@@ -2,6 +2,7 @@ import { ref } from 'vue'
 
 export const audioList: { [key: string]: string } = {
 	move: './sounds/move-sound.mp3',
+	pickupCoin: './sounds/pickupCoin.mp3',
 }
 
 const audioActive = ref(true)

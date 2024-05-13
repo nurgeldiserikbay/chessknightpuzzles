@@ -5,6 +5,7 @@ import { defineStore } from 'pinia'
 import { PAGES, type PagesType } from '@/utils/conts'
 
 import StartPage from '@/pages/StartPage.vue'
+import LevelTypes from '@/pages/LevelTypes.vue'
 import LevelsPage from '@/pages/LevelsPage.vue'
 import PlaygroundPage from '@/pages/PlaygroundPage.vue'
 import LevelDrow from '@/pages/LevelDrow.vue'
@@ -14,6 +15,7 @@ export const usePageStore = defineStore('PageStore', () => {
 
 	const pages: { [key in PagesType]: Component } = {
 		START: StartPage,
+		LEVELTYPES: LevelTypes,
 		LEVELS: LevelsPage,
 		PLAYGROUND: PlaygroundPage,
 		LEVELDRAW: LevelDrow,
@@ -24,7 +26,8 @@ export const usePageStore = defineStore('PageStore', () => {
 	})
 
 	const backLink = computed(() => {
-		if (currentPage.value === PAGES.LEVELS) return PAGES.START
+		if (currentPage.value === PAGES.LEVELTYPES) return PAGES.START
+		else if (currentPage.value === PAGES.LEVELS) return PAGES.LEVELTYPES
 		else if (currentPage.value === PAGES.PLAYGROUND) return PAGES.LEVELS
 		else return ''
 	})

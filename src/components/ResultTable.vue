@@ -5,12 +5,13 @@
 		</div>
 		<div class="result-table__body">
 			<div class="result-table__values">
-				<div class="result-table__time">
+				<div v-if="showTime" class="result-table__time">
 					<span>Time:</span>
 					<span>{{ gameStore.curGameStat.time }}</span>
 				</div>
 				<div class="result-table__move">
-					<span>Moves:</span>
+					<span v-if="showTime">Moves:</span>
+					<span v-else>Pills:</span>
 					<span v-if="gameStore.curGameStat">{{
 						gameStore.curGameStat.moves
 					}}</span>
@@ -49,6 +50,10 @@ import { useGameStore } from '@/store/gameStore'
 
 const { routeTo } = usePageStore()
 
+defineProps<{
+	showTime: boolean
+}>()
+
 const $emits = defineEmits(['reload'])
 
 const gameStore = useGameStore()
@@ -59,6 +64,7 @@ function reload() {
 }
 
 function next() {
+	if (nextLevel.value === undefined) return
 	selectLevel.value(nextLevel.value)
 }
 </script>
@@ -67,7 +73,11 @@ function next() {
 @import '@/assets/_common.scss';
 
 .result-table {
-	background: radial-gradient(ellipse at center, #16A757 0%, #116336 85%);
+	background: radial-gradient(
+		circle,
+		rgba(83, 101, 210, 1) 0%,
+		rgba(3, 34, 110, 1) 100%
+	);
 	width: 480px;
 	max-width: 80%;
 	box-sizing: border-box;
@@ -75,7 +85,7 @@ function next() {
 	padding-top: 25px;
 	margin-top: 9%;
 	border-radius: 25px;
-	box-shadow: 0 5px 10px 0 rgba(254, 203, 35, 0.4);
+	box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.4);
 
 	@media screen and (max-width: $media-tablet) {
 		margin-top: 25%;
@@ -110,6 +120,7 @@ function next() {
 		gap: 15px;
 		font-size: 1.8rem;
 		margin-bottom: 45px;
+		color: #fff;
 	}
 
 	&__time,

@@ -1,36 +1,39 @@
 <template>
 	<div ref="tableRef" class="table">
 		<div id="captureBlock" class="table__inner" :class="{ isHide: isHide }">
-			<div class="border border--top" :style="getTableStyle"></div>
-			<div class="border border--right" :style="getTableStyle"></div>
-			<div class="border border--bottom" :style="getTableStyle"></div>
-			<div class="border border--left" :style="getTableStyle"></div>
+			<div
+				class="horse"
+				:class="{ hide: isHide }"
+				:style="{
+					...getHorseDefStyle,
+					...getHorsePosStyle,
+				}"
+			>
+				<img :src="getHorseImage" alt="knight" />
+			</div>
 			<div v-for="(row, rowInd) in board" :key="rowInd" class="table__row">
 				<div
 					v-for="(col, colInd) in row"
 					:key="colInd"
 					class="table__col"
 					:style="getCellStyle(colInd + (rowInd % 2))"
-					:class="{ active: !isHide && isPossibleMove(rowInd, colInd) }"
+					:class="{
+						active: !isHide && isPossibleMove(rowInd, colInd),
+						is_brick:
+							(!canToBack && col.type === BOARD_ITEM.cell) ||
+							col.type === BOARD_ITEM.brick,
+					}"
 					@click="move(rowInd, colInd)"
 				>
-					<img
-						v-if="col.type === BOARD_ITEM.horse"
-						:src="getHorseImage"
-						alt=""
-						class="horse"
-						:class="{ hide: isHide }"
-					/>
-					<img
+					<div
 						v-if="col.type === BOARD_ITEM.pill"
-						src="/img/board/coin.png"
-						alt=""
 						class="coin"
 						:class="{ hide: isHide }"
-					/>
-					<div v-if="col.type === BOARD_ITEM.brick" class="brick">
-						<img src="/img/board/stone.png" alt="stone" />
-					</div>
+						:style="{
+							...getCoinStyle,
+							// animationDelay: `${(getRandomInt(6) * 400) / 1000}s`,
+						}"
+					></div>
 				</div>
 			</div>
 		</div>
@@ -43,35 +46,33 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { BOARD_ITEM } from '@/game/consts'
 import { TypeBoard } from '@/game/types'
 
-import { useGameStore } from '@/store/gameStore'
+import { useGameSettings } from '@/store/gameSettings'
+// import { getRandomInt } from '@/utils/helpers'
 
 const $props = withDefaults(
 	defineProps<{
 		board: TypeBoard
 		possibleMoves?: number[][]
+		horsePos: number[]
 		isHide?: boolean
+		canToBack?: boolean
 	}>(),
 	{
 		isHide: false,
+		canToBack: true,
 	}
 )
 
 const $emits = defineEmits(['move'])
 
-const gameStore = useGameStore()
+const gameSettings = useGameSettings()
 
 const tableRef = ref<HTMLDivElement | null>(null)
 const boardWidth = ref(80)
 const borderWidth = ref(16)
 
-const getTableStyle = computed(() => {
-	return {
-		background: `url('./img/board/${gameStore.getGameSettings.boardBorderImg}.png')`,
-	}
-})
-
 const isPossibleMove = computed(() => (row: number, col: number) => {
-	return $props.possibleMoves?.some((p) => p[0] === row && p[1] === col)
+	return gameSettings.showPossibleMoves && $props.possibleMoves?.some((p) => p[0] === row && p[1] === col)
 })
 
 const getCellStyle = computed(() => (ind: number) => {
@@ -81,7 +82,7 @@ const getCellStyle = computed(() => (ind: number) => {
 			minWidth: `${boardWidth.value}px`,
 			height: `${boardWidth.value}px`,
 			minHeight: `${boardWidth.value}px`,
-			backgroundImage: `url('./img/board/${gameStore.getGameSettings.board1}.png')`,
+			background: `${gameSettings.getGameSettings.board1}`,
 		}
 	} else {
 		return {
@@ -89,13 +90,35 @@ const getCellStyle = computed(() => (ind: number) => {
 			minWidth: `${boardWidth.value}px`,
 			height: `${boardWidth.value}px`,
 			minHeight: `${boardWidth.value}px`,
-			backgroundImage: `url('./img/board/${gameStore.getGameSettings.board2}.png')`,
+			background: `${gameSettings.getGameSettings.board2}`,
 		}
 	}
 })
 
+const getCoinStyle = computed(() => {
+	return {
+		background: gameSettings.getGameSettings.coinBg,
+	}
+})
+
+const getHorseDefStyle = computed(() => {
+	return {
+		height: `${Math.floor(boardWidth.value * 1.5)}px`,
+		left: `${boardWidth.value / 2}px`,
+		top: `${boardWidth.value / 2}px`,
+	}
+})
+
+const getHorsePosStyle = computed(() => {
+	return {
+		transform: `translate(${
+			boardWidth.value * $props.horsePos[1] + $props.horsePos[1]
+		}px, ${boardWidth.value * $props.horsePos[0] + $props.horsePos[0]}px)`,
+	}
+})
+
 const getHorseImage = computed(() => {
-	return `./img/board/${gameStore.getGameSettings.horse}.png`
+	return `./img/board/${gameSettings.getGameSettings.horse}-${gameSettings.horseColor}.png`
 })
 
 onMounted(() => {
@@ -117,7 +140,9 @@ function calculateBoardWidth() {
 		const style = getComputedStyle(tableRef.value)
 		const width = Math.floor(parseInt(style.width))
 		const min = Math.min(width, window.innerHeight * 0.8)
-		boardWidth.value = Math.floor(min / $props.board.length)
+		boardWidth.value = Math.floor(
+			min / $props.board.length - Math.floor($props.board.length / 2)
+		)
 	}
 
 	if (window.innerWidth < 480) {
@@ -139,40 +164,19 @@ function calculateBoardWidth() {
 	box-sizing: border-box;
 
 	&__inner {
+		/* background: #fff; */
 		position: relative;
-		padding: 16px;
-
-		@media screen and (max-width: 480px) {
-			padding: 8px;
-		}
-
-		&:after {
-			content: '';
-			position: absolute;
-			top: 16px;
-			left: 16px;
-			right: 16px;
-			bottom: 16px;
-			box-shadow: inset 0 0 10px 5px rgba(0, 0, 0, 0.8);
-			pointer-events: none;
-
-			@media screen and (max-width: 480px) {
-				top: 8px;
-				left: 8px;
-				right: 8px;
-				bottom: 8px;
-			}
-		}
-
-		&.isHide:after {
-			box-shadow: none;
-		}
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 1px;
 	}
 
 	&__row {
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		gap: 1px;
 		position: relative;
 	}
 
@@ -186,6 +190,13 @@ function calculateBoardWidth() {
 		background-size: contain;
 		background-repeat: no-repeat;
 		position: relative;
+		border-radius: 5px;
+		box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.4),
+			0 0 2px 1px rgba(0, 0, 0, 0.3);
+
+		&.is_brick {
+			opacity: 0;
+		}
 
 		&.active {
 			&::before {
@@ -195,72 +206,38 @@ function calculateBoardWidth() {
 				left: 0;
 				right: 0;
 				bottom: 0;
-				background: rgba(207, 225, 68, 0.6);
+				background: rgba(226, 255, 4, 0.5);
 			}
-		}
-
-		.horse {
-			width: 80%;
-			height: 80%;
-			display: block;
-			object-fit: contain;
 		}
 
 		.coin {
+			position: relative;
+			z-index: 15;
 			width: 50%;
 			height: 50%;
+			border-radius: 50%;
 			display: block;
-			object-fit: contain;
 			pointer-events: none;
-		}
-
-		.brick {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 100%;
-			height: 100%;
-
-			img {
-				width: 80%;
-				height: 80%;
-			}
-		}
-
-		.hide {
-			opacity: 0;
+			box-shadow: 2px 2px 25px 0 rgba(0, 0, 0, 0.5);
 		}
 	}
 
-	.border {
+	.hide {
+		opacity: 0;
+	}
+
+	.horse {
+		pointer-events: none;
 		position: absolute;
+		transition: 0.3s;
+		z-index: 50;
 
-		&--top {
-			left: 16px;
-			top: 0;
-			right: 16px;
-			height: 16px;
-		}
-
-		&--right {
-			top: 0;
-			bottom: 0;
-			right: 0;
-			width: 16px;
-		}
-
-		&--bottom {
-			left: 16px;
-			bottom: 0;
-			right: 16px;
-			height: 16px;
-		}
-
-		&--left {
-			top: 0;
-			bottom: 0;
-			left: 0;
-			width: 16px;
+		img {
+			max-height: 100%;
+			display: block;
+			position: relative;
+			left: -50%;
+			top: -70%;
 		}
 	}
 }

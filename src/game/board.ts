@@ -2,6 +2,7 @@ import { getRandomNumberExc } from '../helpers'
 import { BOARD_ITEM } from './consts'
 import { TypeHorsePos } from './horse'
 import { TypeBoard, TypeBoardItemsType, TypeBoardItems } from './types'
+import { getRandomInt } from '@/utils/helpers'
 
 export interface IBoardOpt {
   length?: number
@@ -98,5 +99,22 @@ export class Board {
     this.board[point[0]][point[1]].user = user
 
     this.lastPoint = this.board[point[0]][point[1]]
+  }
+
+  setCoin() {
+    if (!this.board) return
+
+    let point: [number, number]
+  
+    do {
+      point = [getRandomInt(this.board.length), getRandomInt(this.board.length)]
+    } while (!this.isCell(this.board, point))
+  
+    this.board[point[0]][point[1]].type = BOARD_ITEM.pill
+  }
+
+  isCell(board: TypeBoard, point: [number, number]): boolean {
+    if (board[point[0]] && board[point[0]][point[1]] && board[point[0]][point[1]].type === BOARD_ITEM.cell) return true
+    return false
   }
 }

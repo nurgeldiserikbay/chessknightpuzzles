@@ -12,13 +12,17 @@ const { routeTo } = usePageStore()
 			<div class="logo start-page__logo">
 				<img src="@/assets/img/logo.png" alt="logo" />
 			</div>
-			<button class="start-page__btn" @click="routeTo(PAGES.LEVELS)">
+			<button class="start-page__btn" @click="routeTo(PAGES.LEVELTYPES)">
 				<img src="@/assets/img/start.png" alt="start" />
 			</button>
 		</div>
 
 		<div class="privacy">
-			<a href="https://docs.google.com/document/d/1Hk88865_6yvWeWvi25jErXQOD6Oi5-h2qEHW5d8P25Y" target="_blank">Privacy Policy</a>
+			<a
+				href="https://docs.google.com/document/d/1Hk88865_6yvWeWvi25jErXQOD6Oi5-h2qEHW5d8P25Y"
+				target="_blank"
+				>Privacy Policy</a
+			>
 		</div>
 	</div>
 </template>

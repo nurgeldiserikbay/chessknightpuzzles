@@ -117,8 +117,8 @@ export class Horse {
 		return board.every((r) => r.every((c) => c.type !== BOARD_ITEM.pill))
 	}
 
-	moveHorse(targetMove: TypeHorsePos): boolean {
-		if (this.isPosibleMove(targetMove)) {
+	moveHorse(targetMove: TypeHorsePos, canToBack: boolean): boolean {
+		if (this.isPosibleMove(targetMove, canToBack)) {
 			this.currentPos = targetMove
 			this.board.setHorseTo(targetMove, this.user)
 
@@ -128,8 +128,8 @@ export class Horse {
 		return false
 	}
 
-	isPosibleMove(targetMove: TypeHorsePos): boolean {
-		return this.isPosiblePoint(targetMove) && this.isCorrectMove(targetMove)
+	isPosibleMove(targetMove: TypeHorsePos, canToBack: boolean): boolean {
+		return this.isPosiblePoint(targetMove, canToBack) && this.isCorrectMove(targetMove)
 	}
 
 	isCorrectMove(targetMove: TypeHorsePos): boolean {
@@ -140,7 +140,7 @@ export class Horse {
 		})
 	}
 
-	isPosiblePoint(point: TypeHorsePos): boolean {
+	isPosiblePoint(point: TypeHorsePos, canToBack: boolean = true): boolean {
 		if (
 			!this.board.board ||
 			!this.board.board[point[0]] ||
@@ -148,7 +148,7 @@ export class Horse {
 		)
 			return false
 
-		if (this.board.board[point[0]][point[1]].type === BOARD_ITEM.cell) {
+		if (canToBack && this.board.board[point[0]][point[1]].type === BOARD_ITEM.cell) {
 			return true
 		} else if (this.board.board[point[0]][point[1]].type === BOARD_ITEM.pill) {
 			this.pillCount += 1

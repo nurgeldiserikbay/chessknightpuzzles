@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 
-import { LEVELS, PAGES } from '@/utils/conts'
+import { LEVELS, PAGES, GAME_TYPES } from '@/utils/conts'
 
 import HeadMain from '@/components/HeadMain.vue'
 
@@ -9,21 +9,40 @@ import { usePageStore } from '@/store/pageStore'
 import { useGameStore } from '@/store/gameStore'
 
 const { routeTo } = usePageStore()
-const { gameStats, selectLevel } = useGameStore()
+const { gameType, gameStats, selectLevel } = useGameStore()
 
 const isLevelActive = computed(() => (level: number) => {
-	return level === 0 || gameStats[level - 1]
+	return level === 0 || gameStats[GAME_TYPES.COLLECT_ALL][level - 1]
 })
 
+const modalActive = ref(false)
+let timerId: ReturnType<typeof setTimeout>
+
 function clickLevel(levelInd: number) {
-	selectLevel(levelInd)
-	routeTo(PAGES.PLAYGROUND)
+	if (!isLevelActive.value(levelInd)) {
+		modalActive.value = true
+		if (timerId) clearTimeout(timerId)
+		timerId = setTimeout(() => {
+			modalActive.value = false
+		}, 1500)
+	} else {
+		selectLevel(levelInd)
+		routeTo(PAGES.PLAYGROUND)
+	}
 }
+
+onBeforeUnmount(() => {
+	if (timerId) clearTimeout(timerId)
+})
 </script>
 
 <template>
 	<HeadMain :settings="false" />
 	<div class="page levels-page">
+		<div v-show="modalActive" class="levels-page__modal">
+			This level has not yet been opened. You must complete the previous level
+			in classic
+		</div>
 		<div class="levels-page__list">
 			<button
 				v-for="level in LEVELS"
@@ -36,20 +55,26 @@ function clickLevel(levelInd: number) {
 					<span class="level__row level__row--level">{{
 						level.level + 1
 					}}</span>
-					<img :src="`./img/levels/${level.img}.png`" alt="" />
+					<!-- <img :src="`./img/levels/${level.img}.png`" alt="" /> -->
 				</div>
 				<div class="level__info">
 					<span class="level__row level__row--level">{{
 						level.level + 1
 					}}</span>
-					<div v-if="gameStats[level.level]" class="level__stat">
-						<span class="level__row level__row--small"
+					<div
+						v-if="gameType && gameStats[gameType][level.level]"
+						class="level__stat"
+					>
+						<span
+							v-if="gameType === GAME_TYPES.COLLECT_ALL"
+							class="level__row level__row--small"
 							><span>Time:</span
-							><span>{{ gameStats[level.level].time }}</span></span
+							><span>{{ gameStats[gameType][level.level].time }}</span></span
 						>
-						<span class="level__row level__row--small"
-							><span>Moves:</span
-							><span>{{ gameStats[level.level].moves }}</span></span
+						<span class="level__row level__row--small">
+							<span v-if="gameType === GAME_TYPES.COLLECT_ALL">Moves:</span>
+							<span v-else>Pills:</span>
+							<span>{{ gameStats[gameType][level.level].moves }}</span></span
 						>
 					</div>
 				</div>
@@ -62,6 +87,29 @@ function clickLevel(levelInd: number) {
 @import '@/assets/_common.scss';
 
 .levels-page {
+	position: relative;
+
+	&__modal {
+		position: fixed;
+		left: 50%;
+		bottom: 120px;
+		z-index: 1000;
+		text-align: center;
+		transform: translateX(-50%);
+		width: 90%;
+		max-width: 280px;
+		color: #fff;
+		padding: 12px 25px;
+		background: radial-gradient(circle, rgb(210, 45, 59) 0%, rgb(237, 30, 30) 60%);
+		box-sizing: border-box;
+
+		@media screen and (max-width: $media-phone) {
+			font-size: 12px;
+			padding: 8px 15px;
+			bottom: 80px;
+		}
+	}
+
 	&__list {
 		width: 100%;
 		display: flex;
@@ -99,8 +147,7 @@ function clickLevel(levelInd: number) {
 		padding: 0;
 
 		&--disaled {
-			cursor: none;
-			pointer-events: none;
+			cursor: auto;
 		}
 
 		@media screen and (max-width: $media-tablet) {
@@ -154,6 +201,7 @@ function clickLevel(levelInd: number) {
 			align-items: center;
 			max-width: 80%;
 			height: 20px;
+			color: #fff;
 		}
 
 		&__row {

@@ -13,7 +13,10 @@
 				<div class="settings-menu__modal" @click.stop.prevent="">
 					<div class="settings-menu__modal-head">
 						<div class="title settings-menu__head">Settings</div>
-						<button class="btn btn--second settings-menu__close" @click="isActive = false">
+						<button
+							class="btn btn--second settings-menu__close"
+							@click="isActive = false"
+						>
 							<IconClose />
 						</button>
 					</div>
@@ -31,8 +34,18 @@
 							<div class="settings-menu__option-title">Show possible moves</div>
 							<div class="settings-menu__option-body">
 								<UiToggle
-									:modelValue="gameStore.showPossibleMoves"
-									@update:modelValue="gameStore.toggleShowPossibleMoves"
+									:modelValue="gameSettings.showPossibleMoves"
+									@update:modelValue="gameSettings.toggleShowPossibleMoves"
+								/>
+							</div>
+						</div>
+						<div class="settings-menu__option settings-menu__option--row">
+							<div class="settings-menu__option-title">Knight</div>
+							<div class="settings-menu__option-body">
+								<img :src="getHorseImage" alt="knight" class="horse" />
+								<UiToggle
+									:modelValue="isWhiteKnigt"
+									@update:modelValue="gameSettings.toggleHorseColor"
 								/>
 							</div>
 						</div>
@@ -45,12 +58,13 @@
 									class="theme"
 									:class="{
 										'theme--active':
-											setting.id === gameStore.getGameSettings.id,
+											setting.id === gameSettings.getGameSettings.id,
+									}"
+									:style="{
+										background: `${setting.board1}`,
 									}"
 									@click="selectTheme(setting.id)"
-								>
-									<img :src="`./img/board/${setting.board}.png`" />
-								</button>
+								></button>
 							</div>
 						</div>
 					</div>
@@ -61,25 +75,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import IconSettings from '@/assets/img/settings.svg'
 import IconClose from '@/assets/img/close.svg'
 
 import UiToggle from '@/components/UiToggle.vue'
 
-import { useGameStore } from '@/store/gameStore'
+import { useGameSettings } from '@/store/gameSettings'
+
 import { useAudio } from '@/composables/useAudio'
 
 import { GAME_SETTINGS } from '@/utils/conts'
 
-const gameStore = useGameStore()
+const gameSettings = useGameSettings()
 const { audioActive, toggleAudio } = useAudio()
 
 const isActive = ref(false)
 
+const isWhiteKnigt = computed(() => {
+	return gameSettings.horseColor === 'white'
+})
+
+const getHorseImage = computed(() => {
+	return `./img/board/${gameSettings.getGameSettings.horse}-${gameSettings.horseColor}.png`
+})
+
 function selectTheme(id: number) {
-	gameStore.setGameSettings(id)
+	gameSettings.setGameSettings(id)
 }
 </script>
 
@@ -91,7 +114,7 @@ function selectTheme(id: number) {
 	flex-shrink: 0;
 
 	&__btn {
-  	border-radius: 5px 8px 8px 12px;
+		border-radius: 5px 8px 8px 12px;
 		outline: none;
 		padding: 2px 8px;
 		cursor: pointer;
@@ -115,7 +138,12 @@ function selectTheme(id: number) {
 		right: 0;
 		bottom: 0;
 		z-index: 1000;
-		background: rgba(0, 0, 0, 0.6);
+		background: rgba(0, 0, 0, 0.3);
+		background: radial-gradient(
+			circle,
+			rgba(83, 101, 210, 0.9) 0%,
+			rgba(3, 34, 110, 0.9) 100%
+		);
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
@@ -124,13 +152,17 @@ function selectTheme(id: number) {
 
 	&__modal {
 		position: relative;
-  	background: radial-gradient(ellipse at center, #16A757 0%, #116336 85%);
+		background: radial-gradient(
+			circle,
+			rgba(83, 101, 210, 1) 0%,
+			rgba(3, 34, 110, 1) 100%
+		);
 		border-radius: 25px 29px 30px 15px;
 		width: 480px;
 		max-width: 80%;
 		box-sizing: border-box;
 		margin-top: 9%;
-		box-shadow: 0 5px 10px 0 rgba(254, 203, 35, 0.4);
+		box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.4);
 
 		@media screen and (max-width: $media-tablet) {
 			margin-top: 25%;
@@ -192,6 +224,7 @@ function selectTheme(id: number) {
 		font-size: 18px;
 		font-weight: 500;
 		margin-bottom: 14px;
+		color: #fff;
 	}
 
 	&__option-body {
@@ -199,6 +232,7 @@ function selectTheme(id: number) {
 		justify-content: space-between;
 		align-items: center;
 		flex-wrap: wrap;
+		gap: 15px;
 
 		.theme {
 			position: relative;
@@ -212,6 +246,9 @@ function selectTheme(id: number) {
 			border: none;
 			outline: none;
 			padding: 0;
+			border-radius: 10px;
+			box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.4),
+				0 0 2px 1px rgba(0, 0, 0, 0.3);
 
 			img {
 				display: block;
@@ -220,18 +257,14 @@ function selectTheme(id: number) {
 			}
 
 			&--active {
-				transform: scale(1.1);
-
-				&:after {
-					content: '';
-					position: absolute;
-					top: 0;
-					left: 0;
-					width: 100%;
-					height: 100%;
-					background: rgba(207, 225, 68, 0.6);
-				}
+				transform: scale(1.2);
+				border: 3px solid rgba(225, 255, 0, 0.9);
 			}
+		}
+
+		.horse {
+			display: block;
+			width: 50px;
 		}
 	}
 }

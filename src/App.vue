@@ -1,29 +1,29 @@
 <script lang="ts" setup>
-import { onMounted } from 'vue'
+import { onBeforeMount, onMounted } from 'vue'
 
+import { useGameSettings } from '@/store/gameSettings'
 import { usePageStore } from '@/store/pageStore'
 import { useGameStore } from '@/store/gameStore'
 
-import { PAGES } from '@/utils/conts'
+import Admob from '@/utils/admob'
 
-import LevelsPage from '@/pages/LevelsPage.vue'
-import PlaygroundPage from '@/pages/PlaygroundPage.vue'
-import StartPage from '@/pages/StartPage.vue'
-import LevelDrow from '@/pages/LevelDrow.vue'
-
+const gameSettings = useGameSettings()
 const pageStore = usePageStore()
 const gameStore = useGameStore()
 
+onBeforeMount(() => {
+	gameStore.loadData()
+})
+
 onMounted(() => {
-	gameStore.setBodyBG()
+	gameSettings.setBodyBG()
+
+	if (import.meta.env.VITE_APP_MODE !== 'TEST') Admob.initialize()
 })
 </script>
 
 <template>
-	<StartPage v-if="pageStore.currentPage === PAGES.START" />
-	<LevelsPage v-if="pageStore.currentPage === PAGES.LEVELS" />
-	<PlaygroundPage v-if="pageStore.currentPage === PAGES.PLAYGROUND" />
-	<LevelDrow v-if="pageStore.currentPage === PAGES.LEVELDRAW" />
+	<component :is="pageStore.currentPageComponent" />
 </template>
 
 <style scoped></style>

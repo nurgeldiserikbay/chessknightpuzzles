@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import html2canvas from 'html2canvas'
 
 import { TypeBoard, TypeBoardItemsType } from '@/game/types'
@@ -27,6 +27,10 @@ const board = reactive<{ value: TypeBoard | null }>({
 })
 const validState = ref<boolean | undefined>()
 const isHide = ref(false)
+
+const horsePos = computed(() => {
+	return (horse.value || [0, 0]) as number[]
+})
 
 onMounted(() => {
 	const getDefLen = localStorage.getItem('get-def-len')
@@ -167,12 +171,8 @@ function loadFile(data: any, filename: string) {
 				type="text"
 				placeholder="Recursive count"
 			/>
-			<input
-				v-model="levelName"
-				type="text"
-				placeholder="Level Name"
-			/>
-			<div style="min-width: 100%;"></div>
+			<input v-model="levelName" type="text" placeholder="Level Name" />
+			<div style="min-width: 100%"></div>
 			<button @click="generate">Generate</button>
 			<button
 				v-if="board.value && state === TABLE_STATE.FIX"
@@ -199,6 +199,7 @@ function loadFile(data: any, filename: string) {
 		<BoardTable
 			v-if="board.value"
 			:board="board.value"
+			:horsePos="horsePos"
 			:isHide="isHide"
 			@move="move"
 		/>
@@ -211,5 +212,6 @@ function loadFile(data: any, filename: string) {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 5px 15px;
+	margin-bottom: 25px;
 }
 </style>
