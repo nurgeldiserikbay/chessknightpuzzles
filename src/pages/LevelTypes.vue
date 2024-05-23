@@ -46,7 +46,7 @@ function clickOnType(type: GAME_TYPE) {
 					class="level-type__title"
 					@click="clickOnType(GAME_TYPES.BY_TIME)"
 				>
-					<span>For time</span>
+					<span>For Time</span>
 				</button>
 				<div class="level-type__desc">Collect the pills in the given time</div>
 			</div>
